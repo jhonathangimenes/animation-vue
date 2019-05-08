@@ -1,35 +1,18 @@
 <template>
     <div>
         <div class="jumbotron">
-            <h1 class="display-4">Animantion Vue!</h1>
+            <h1 class="display-4">Animation Vue!</h1>
         </div>
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <form @submit.prevent="mark">
-                        <label>Paciente</label>
-                        <input class="form-control"
-                            type="text"
-                            placeholder="Nome paciente"
-                            v-model.lazy.trim="patient.name">
-                        <label>Idade</label>
-                        <input class="form-control"
-                            type="number"
-                            placeholder="Idade do paciente"
-                            v-model="patient.age">
-                        <label>Horario do atendimento</label>
-                        <select class="form-control" v-model="patient.schedule">
-                            <option selected disabled value="">Selecione horario...</option>
-                            <option value="9:00">9:00</option>
-                            <option value="10:00">10:00</option>
-                            <option value="11:00">11:00</option>
-                            <option value="12:00">12:00</option>
-                        </select>
-                        <div class="float-right mt-3">
-                            <button class="btn btn-secondary mr-2">Cancelar</button>
-                            <button class="btn btn-success">Salvar</button>
-                        </div>
-                    </form>
+                    <transition enter-active-class="animated rubberBand">
+                        <component :is="status" 
+                            @change="status = 'Form'"
+                            @back="status = 'Start'"
+                            @markForm="mark($event)">
+                        </component>
+                    </transition>
                 </div>
                 <div class="col-md-6">
                     <transition-group name="list" 
@@ -50,14 +33,13 @@
 </template>
 <script>
 export default {
+    components: {
+        Form: () => import('./Form.vue'),
+        Start: () => import('./Start.vue')
+    },
     data() {
         return {
-            patient: {
-                id: 0,
-                name: '',
-                age: undefined,
-                schedule: ''
-            },
+            status: 'Start',
             consultations: [
                 {id: 1, name: 'João', age: '38', schedule: '9:00'},
                 {id: 2, name: 'Pedro', age: '22', schedule: '10:00'},
@@ -67,10 +49,10 @@ export default {
         }
     },
     methods: {
-        mark() {
-            this.patient.id = +this.consultations.length + 1
-            this.consultations.push(this.patient)
-            this.patient = {}
+        mark(event) {
+            event.id = +this.consultations.length + 1
+            this.consultations.push(event)
+            this.status = 'Start'
         },
         remove (consultation) {
             let index = this.consultations.indexOf(consultation);
